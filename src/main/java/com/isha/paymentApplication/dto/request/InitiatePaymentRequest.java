@@ -3,9 +3,13 @@ package com.isha.paymentApplication.dto.request;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 
+@Getter
+@Setter
 public class InitiatePaymentRequest {
     @NotNull(message = "User ID is required")
     private Long userId;
@@ -19,4 +23,6 @@ public class InitiatePaymentRequest {
 
     @NotBlank(message = "Card hash is required")
     private String cardHash;
+
+
 }

@@ -28,7 +28,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ApiResponse<String> login(@RequestBody LoginRequest request) {
+    public ApiResponse<AuthResponse> login(@RequestBody LoginRequest request) {
         User user = userService.login(request);
         String token = jwtUtil.generateToken(user.getEmail(), user.getRole().name());
         AuthResponse authResponse = new AuthResponse(
@@ -38,6 +38,6 @@ public class AuthController {
                 user.getName(),
                 user.getRole().name()
         );
-        return ApiResponse.success("Login successful", user.getEmail());
+        return ApiResponse.success("Login successful", authResponse);
     }
 }
