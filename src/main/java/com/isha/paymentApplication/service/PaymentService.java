@@ -15,17 +15,25 @@ import java.util.UUID;
 public class PaymentService {
 
     private final PaymentRepository paymentRepository;
+    private final FraudCheckService fraudCheckService;
 
-    public PaymentResponse initiatePayment(InitiatePaymentRequest request) {
-
+    public PaymentResponse initiatePayment(InitiatePaymentRequest request , String ipAddress) {
+        boolean blocked = fraudCheckService.isBlocked(request.getCardHash(), ipAddress);
         Payment payment = new Payment();
         payment.setOrderId(UUID.randomUUID().toString());
         payment.setUserId(request.getUserId());
         payment.setAmount(request.getAmount());
         payment.setCurrency(request.getCurrency());
         payment.setCardHash(request.getCardHash());
-        payment.setStatus(PaymentStatus.PENDING);
+        payment.setIpAddress(ipAddress);
 
+
+        if (blocked) {
+            payment.setStatus(PaymentStatus.BLOCKED);
+            paymentRepository.save(payment);
+            throw new RuntimeException("Too many attempts detected. This payment has been blocked.");
+        }
+        payment.setStatus(PaymentStatus.PENDING);
         payment.setGatewayRef("gw_" + UUID.randomUUID());
 
         Payment saved = paymentRepository.save(payment);
