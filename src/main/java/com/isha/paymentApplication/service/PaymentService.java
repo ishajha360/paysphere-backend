@@ -44,5 +44,21 @@ public class PaymentService {
                 saved.getStatus().name(),
                 saved.getGatewayRef()
         );
+
+    }
+    public void markSuccess(String gatewayRef) {
+        Payment payment = paymentRepository.findByGatewayRef(gatewayRef)
+                .orElseThrow(() -> new RuntimeException("Payment not found for gatewayRef: " + gatewayRef));
+
+        payment.setStatus(PaymentStatus.SUCCESS);
+        paymentRepository.save(payment);
+    }
+
+    public void markFailed(String gatewayRef) {
+        Payment payment = paymentRepository.findByGatewayRef(gatewayRef)
+                .orElseThrow(() -> new RuntimeException("Payment not found for gatewayRef: " + gatewayRef));
+
+        payment.setStatus(PaymentStatus.FAILED);
+        paymentRepository.save(payment);
     }
 }
