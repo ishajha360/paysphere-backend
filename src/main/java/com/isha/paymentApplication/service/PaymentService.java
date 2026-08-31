@@ -8,7 +8,9 @@ import com.isha.paymentApplication.repository.PaymentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -42,7 +44,8 @@ public class PaymentService {
                 saved.getId(),
                 saved.getOrderId(),
                 saved.getStatus().name(),
-                saved.getGatewayRef()
+                saved.getGatewayRef(),
+                saved.getAmount()
         );
 
     }
@@ -60,5 +63,18 @@ public class PaymentService {
 
         payment.setStatus(PaymentStatus.FAILED);
         paymentRepository.save(payment);
+    }
+    public List<PaymentResponse> getPaymentHistory(Long userId) {
+        List<Payment> payments = paymentRepository.findByUserId(userId);
+
+        return payments.stream()
+                .map(p -> new PaymentResponse(
+                        p.getId(),
+                        p.getOrderId(),
+                        p.getStatus().name(),
+                        p.getGatewayRef(),
+                        p.getAmount()
+                ))
+                .collect(Collectors.toList());
     }
 }

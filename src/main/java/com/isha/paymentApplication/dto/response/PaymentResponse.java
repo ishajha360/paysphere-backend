@@ -2,6 +2,8 @@ package com.isha.paymentApplication.dto.response;
 
 import lombok.*;
 
+import java.math.BigDecimal;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -12,4 +14,5 @@ public class PaymentResponse {
     private String orderId;
     private String status;
     private String gatewayRef;
+    private BigDecimal amount;
 }

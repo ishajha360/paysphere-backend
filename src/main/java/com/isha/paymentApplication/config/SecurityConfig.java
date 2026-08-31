@@ -1,4 +1,5 @@
 package com.isha.paymentApplication.config;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import com.isha.paymentApplication.security.JwtAuthFilter;
 import lombok.RequiredArgsConstructor;
@@ -9,6 +10,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.cors.CorsConfigurationSource;
 
 
 @Configuration
@@ -25,6 +27,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
+                .cors(Customizer.withDefaults())
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
