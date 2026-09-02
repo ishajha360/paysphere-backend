@@ -18,7 +18,7 @@ public class PaymentController {
     private final PaymentService paymentService;
 
     @PostMapping("/initiate")
-    public ApiResponse<PaymentResponse> initiate(@RequestBody InitiatePaymentRequest request, HttpServletRequest httpRequest) {
+    public ApiResponse<PaymentResponse> initiate(@RequestBody InitiatePaymentRequest request, HttpServletRequest httpRequest) throws Exception {
         String ip = httpRequest.getRemoteAddr();
         PaymentResponse response = paymentService.initiatePayment(request , ip);
         return ApiResponse.success("Payment initiated successfully", response);

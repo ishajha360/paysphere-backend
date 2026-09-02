@@ -5,9 +5,14 @@ import com.isha.paymentApplication.dto.response.PaymentResponse;
 import com.isha.paymentApplication.entity.Payment;
 import com.isha.paymentApplication.entity.PaymentStatus;
 import com.isha.paymentApplication.repository.PaymentRepository;
+import com.razorpay.Order;
+import com.razorpay.RazorpayClient;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.json.JSONObject;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -18,8 +23,13 @@ public class PaymentService {
 
     private final PaymentRepository paymentRepository;
     private final FraudCheckService fraudCheckService;
+    @Value("${RAZORPAY_KEY_ID}")
+    private String razorpayKeyId;
 
-    public PaymentResponse initiatePayment(InitiatePaymentRequest request , String ipAddress) {
+    @Value("${RAZORPAY_KEY_SECRET}")
+    private String razorpayKeySecret;
+
+    public PaymentResponse initiatePayment(InitiatePaymentRequest request , String ipAddress) throws Exception {
         boolean blocked = fraudCheckService.isBlocked(request.getCardHash(), ipAddress);
         Payment payment = new Payment();
         payment.setOrderId(UUID.randomUUID().toString());
@@ -35,8 +45,16 @@ public class PaymentService {
             paymentRepository.save(payment);
             throw new RuntimeException("Too many attempts detected. This payment has been blocked.");
         }
+        RazorpayClient razorpay = new RazorpayClient(razorpayKeyId, razorpayKeySecret);
+        JSONObject orderRequest = new JSONObject();
+        orderRequest.put("amount", request.getAmount().multiply(BigDecimal.valueOf(100)).intValue());
+        orderRequest.put("currency", request.getCurrency());
+        orderRequest.put("receipt", payment.getOrderId());
+
+        Order razorpayOrder = razorpay.orders.create(orderRequest);
+
         payment.setStatus(PaymentStatus.PENDING);
-        payment.setGatewayRef("gw_" + UUID.randomUUID());
+        payment.setGatewayRef(razorpayOrder.get("id"));
 
         Payment saved = paymentRepository.save(payment);
 
